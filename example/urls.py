@@ -8,8 +8,11 @@ from django.conf.urls.defaults import *
 from django.conf import settings
 
 # Uncomment the next two lines to enable the admin:
-from django.contrib import admin
+from django.contrib.gis import admin
 admin.autodiscover()
+
+from geocamLayer import models
+objects = [models.RandomFeature() for x in range(1000)]
 
 urlpatterns = patterns('',
     # Example:
@@ -23,6 +26,10 @@ urlpatterns = patterns('',
     (r'^admin/', include(admin.site.urls)),
     
 )
+
+urlpatterns += patterns('geocamLayer',
+    (r'^$', 'views.get', {'objects':objects})
+    )
 
 urlpatterns = urlpatterns + patterns('',
     (r'^static/(?P<path>.*)$', 'django.views.static.serve',
