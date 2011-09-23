@@ -25,10 +25,11 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
     
-)
 
+)
 urlpatterns += patterns('geocamLayer',
-    (r'^$', 'views.get', {'objects':objects})
+    (r'^points/', 'views.get', {'objects':objects}),
+    (r'^$', 'views.main', {})
     )
 
 urlpatterns = urlpatterns + patterns('',
