@@ -54,6 +54,6 @@ class Feature(BaseFeature):
 
 class RandomFeature(Feature):
     def __init__(self, *args, **kwargs):
-        Feature.__init__(self, Point((random.randint(0,180), random.randint(0,180))),
+        Feature.__init__(self, Point((random.randint(-180,180), random.randint(-180,180))),
                          time.time(), datetime.timedelta(random.randint(0,3)),
                          "Random Feature", "Random Feature", {}, *args, **kwargs)
