@@ -12,7 +12,7 @@ from django.contrib.gis import admin
 admin.autodiscover()
 
 from geocamLayer import models
-objects = [models.RandomFeature() for x in range(50000)]
+objects = [models.RandomFeature() for x in range(1000)]
 
 urlpatterns = patterns('',
     # Example:
