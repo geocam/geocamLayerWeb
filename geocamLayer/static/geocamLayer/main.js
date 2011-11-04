@@ -49,9 +49,14 @@ function getClusters() {
     if (updating) {concurent = true; return;}
     clearClusters();
     updating = true;
-    bounds = map.getBounds().toUrlValue();
+    bounds = map.getBounds()
+    lat = map.getCenter().lat()
+    lng = map.getCenter().lng()
+    zoom_x = 360/(bounds.getNorthEast().lng()-bounds.getSouthWest().lng())
+    zoom_y = 180/(bounds.getNorthEast().lat()-bounds.getSouthWest().lat())
+    zoom = (zoom_x > zoom_y)?zoom_y:zoom_x;
     conn = new XMLHttpRequest();
-    conn.open("GET","/points/?cluster=1&bbox="+bounds,true);
+    conn.open("GET","/points/"+zoom+"/"+lng+"/"+lat+"?cluster=1",true);
     conn.send();
     conn.onreadystatechange = setClusters;
     //Clusters();
@@ -84,3 +89,24 @@ function setClusters() {
     }
     if (concurent && !updating) {getClusters(); concurent = false;}
 }
+
+/*
+function foo () {
+    south = blah
+    north = blah
+    east = blah
+    west = blah
+
+    size = max(south-north, east-west)
+    zoom = ceiling(log2(360/size))
+
+    tile_size = 360/2**zoom
+    west_x = floor((west-(-180))/tile_size)
+    south_y = floor((south-(-90))/tile_size)
+    east_x = ceiling((east-(-180))/tile_size)
+    north_y = ceiling((north-(-90))/tile_size)
+    
+    for x in range(west_x, east_x):
+        for y in range(south_y, north_y):
+	    fetch(zoom, x, y)
+*/

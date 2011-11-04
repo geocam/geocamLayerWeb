@@ -106,4 +106,5 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.gis',
     'geocamLayer',
+    'django_websocket',
 )

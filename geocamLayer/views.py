@@ -24,15 +24,33 @@ DEFAULT_ENCODING = ["geojson"]
 def main(request):
     return HttpResponseRedirect('/static/geojsontest.html')
 
-def get(request, objects, encoding=None):
+def points(request, zoom, x, y, objects, encoding=None):
+    zoom, x, y = [float(z) for z in [zoom, x, y]]
+    south = y - (90/(zoom))
+    north = y + (90/(zoom))
+    west  = x - (180/(zoom))
+    east  = x + (180/(zoom))
+    #scale = 360/(2**zoom)
+    #south = -90 + scale * y
+    #west = -180 + scale * x
+    #north = south + scale
+    #east = west + scale
+    return get(request, west, south, east, north, objects, encoding)
+
+def get(request, west, south, east, north, objects, encoding=None):
     # get parameters from request
+    if west < -180:
+        west = -180
+    if south < -90:
+        south = -90
+    if east > 180:
+        east = 180
+    if north > 90:
+        north = 90
+    print south, west, north, east
+    if east < west: inverse = True
+    else: inverse = False
     params = dict(request.GET)
-    inverse = False
-    if u'bbox' in params:
-        values = params[u'bbox'][0].split(',')
-        south, west, north, east = [float(x) for x in values]
-        if east < west: inverse = True
-    else: bounds = DEFAULT_BOUNDS
 
     start    = int(params.get(u'start',    DEFAULT_START)[0])
     end      = int(params.get(u'end',      DEFAULT_END)[0])
@@ -41,20 +59,19 @@ def get(request, objects, encoding=None):
     encoding =     params.get(u'encoding', DEFAULT_ENCODING)[0]
 
     # now for the filtering part
-    bbox_width  = west-east
-    bbox_width_ = bbox_width*1.2 # cheap trick to get clusters to cluster correctly
-    bbox_height = south-north
+    bbox_width  = (west-east)*1.2
+    bbox_height = (south-north)*1.2
     if int(reverse):
         new_objects = reversed(objects)
     else:
         new_objects = objects
-    if int(cluster) and u'bbox' in params:
+    if int(cluster):
         clusters = [[[] for x in range(10)] for y in range(10)]
         for object in new_objects:
             obj_x = object.getPosition().coords[0]
             obj_y = object.getPosition().coords[1]
             if not inverse:
-                x_pos = int( ((obj_x-east) /bbox_width_) *10)
+                x_pos = int( ((obj_x-east) /bbox_width) *10)
                 y_pos = int( ((obj_y-north)/bbox_height) *10)
                 if x_pos >= 10 or y_pos >= 10: continue
                 if x_pos < 0 or y_pos < 0: continue
@@ -77,6 +94,7 @@ def get(request, objects, encoding=None):
     if encoding == 'geojson':
         data = {'type': 'FeatureCollection',
                 'features': []}
+        print len(clusters)
         for row in clusters:
             for cluster in row:
                 lat_coords = [point.getPosition().coords[1] for point in cluster]
@@ -117,30 +135,36 @@ def get(request, objects, encoding=None):
 
     if encoding == 'kml':
         response_data = '<?xml version="1.0" encoding = "UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document>'
-        for cluster in clusters:
-            response_data += '<Placemark>'
-            lat_coords = [x.getPosition().coords[1] for x in cluster]
-            lng_coords = [x.getPosition().coords[0] for x in cluster]
-            average = [sum(lat_coords)/float(len(lat_coords)),
-                       sum(lng_coords)/float(len(lng_coords))]
-            points = {}
-            for point in cluster:
-                coords = str(list(reversed(point.getPosition().coords)))
-                points[coords] = {'timestamp':point.getTimeStamp(),
-                                  'timespan': str(point.getTimeSpan()),
-                                  'name':     point.getName(),
-                                  'description': point.getDescriptionHTML()}
-                for property in point.getProperties():
-                    points[coords][property] = point.getProperties()[property]
-            bbox = GeometryCollection(*[x.getPosition() for x in cluster]).extent
-            bbox = [bbox[1], bbox[0], bbox[3], bbox[2]]
-            response_data += '<Point><coordinates>%s,%s,0</coordinates></Point><ExtendedData>' % (average[0], average[1])
-            response_data += '<Data name="numpoints"><value>%s</value></Data>' % len(cluster)
-            response_data += '<Data name="bbox"><value>%s</value></Data>' % json.dumps(bbox)
-            for point in points:
-                response_data += '<Data name="%s"><value>%s</value></Data>'% (str(point), json.dumps(points[point]))
-            response_data += '</ExtendedData></Placemark>'
-        response_data += '</Document></kml>'
-
+        for row in clusters:
+            for cluster in row:
+                lat_coords = [point.getPosition().coords[1] for point in cluster]
+                lng_coords = [point.getPosition().coords[0] for point in cluster]
+                if not len(lat_coords) or not len(lng_coords): continue
+                response_data += '\n<Placemark>'
+                average = [sum(lat_coords)/float(len(lat_coords)),
+                           sum(lng_coords)/float(len(lng_coords))]
+                
+                response_data += '\n<Point><coordinates>%s,%s,0</coordinates></Point><ExtendedData>' % (average[0], average[1])
+                if len(cluster) > 1:
+                    east, north, west, south = GeometryCollection(*[x.getPosition() for x in cluster]).extent
+                    bbox = [north, east, south, west]
+                    response_data += '\n<Data name="subtype"><value>cluster</value></Data>'
+                    response_data += '\n<Data name="numpoints"><value>%s</value></Data>' % len(cluster)
+                    response_data += '\n<Data name="bbox"><value>%s</value></Data>' % json.dumps(bbox)
+                else:
+                    point = cluster[0]
+                    response_data += '\n<Data name="subtype"><value>point</value></Data>'
+                    info = {'timestamp':point.getTimeStamp(),
+                            'timespan': str(point.getTimeSpan()),
+                            'name':     point.getName(),
+                            'description': point.getDescriptionHTML()}
+                    properties = point.getProperties()
+                    for property in properties:
+                        info[property] = properties[property]
+                    for peice in info:
+                        response_data += '\n<Data name="%s"><value>%s</value></Data>' % (peice, info[peice])
+                response_data += '\n</ExtendedData></Placemark>'
+        response_data += '\n</Document></kml>'
+                            
     # now return everything
     return HttpResponse(response_data)
