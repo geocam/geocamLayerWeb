@@ -54,7 +54,9 @@ function getClusters() {
     lng = map.getCenter().lng()
     zoom_x = 360/(bounds.getNorthEast().lng()-bounds.getSouthWest().lng())
     zoom_y = 180/(bounds.getNorthEast().lat()-bounds.getSouthWest().lat())
-    zoom = (zoom_x > zoom_y)?zoom_y:zoom_x;
+    zoom_p = (zoom_x > zoom_y)?zoom_y:zoom_x;
+    zoom_n = (zoom_x > zoom_y)?zoom_x:zoom_y;
+    zoom   = (zoom_x < 0 || zoom_y < 0)?zoom_n:zoom_p;
     conn = new XMLHttpRequest();
     conn.open("GET","/points/"+zoom+"/"+lng+"/"+lat+"?cluster=1",true);
     conn.send();

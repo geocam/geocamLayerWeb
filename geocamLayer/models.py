@@ -4,8 +4,9 @@
 # All Rights Reserved.
 # __END_LICENSE__
 
-from django.contrib.gis.db import models
-from django.contrib.gis.geos import Point
+#from django.contrib.gis.db import models
+#from django.contrib.gis.geos import Point
+from django.db import models
 import datetime, time, random
 
 class BaseFeature(models.Model):
@@ -13,7 +14,7 @@ class BaseFeature(models.Model):
     # what you need to implement
     def getPosition(self):
         # in Point object
-        return Point(0,0)
+        return (0,0)
     def getTimeStamp(self):
         # in a time.time() format
         # optional
@@ -34,7 +35,7 @@ class BaseFeature(models.Model):
         return ""
 
 class Feature(BaseFeature):
-    def __init__(self, position=Point((0,0)), timestamp=time.time(),
+    def __init__(self, position=(0,0), timestamp=time.time(),
                  timespan=datetime.timedelta(), name="Feature",
                  description="Simple feature", properties={}, *args, **kwargs):
         BaseFeature.__init__(self, *args, **kwargs)
@@ -54,6 +55,6 @@ class Feature(BaseFeature):
 
 class RandomFeature(Feature):
     def __init__(self, *args, **kwargs):
-        Feature.__init__(self, Point((random.randint(-180,180), random.randint(-90,90))),
+        Feature.__init__(self, (random.randint(-180,180), random.randint(-90,90)),
                          time.time(), datetime.timedelta(random.randint(0,3)),
                          "Random Feature", "Random Feature", {}, *args, **kwargs)

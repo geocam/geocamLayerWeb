@@ -72,4 +72,8 @@ The positions and bounding boxes of the objects sent through the geojson are int
 
 To get the included demo running:
 
-1. Setup a
+1. Install django
+2. cd into example
+3. python manage.py syncdb
+4. python manage.py runserver
+5. demo is now running on localhost:8000

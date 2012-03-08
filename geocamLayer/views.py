@@ -10,7 +10,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.http import HttpResponseForbidden, Http404
 from django.template import RequestContext, Context, loader
 from django.utils.translation import ugettext, ugettext_lazy as _
-from django.contrib.gis.geos import Polygon, Point, GeometryCollection
+#from django.contrib.gis.geos import Polygon, Point, GeometryCollection
 import json
 
 DEFAULT_BOUNDS = (180,180,-180,-180)
@@ -39,15 +39,10 @@ def points(request, zoom, x, y, objects, encoding=None):
 
 def get(request, west, south, east, north, objects, encoding=None):
     # get parameters from request
-    if west < -180:
-        west = -180
-    if south < -90:
-        south = -90
-    if east > 180:
-        east = 180
-    if north > 90:
-        north = 90
-    print south, west, north, east
+    while west < -180: west += 180; east += 180
+    while west >  180: west -= 180; east -= 180
+    while east < -180: east += 180; east += 180
+    while east >  180: east -= 180; east -= 180
     if east < west: inverse = True
     else: inverse = False
     params = dict(request.GET)
@@ -59,7 +54,8 @@ def get(request, west, south, east, north, objects, encoding=None):
     encoding =     params.get(u'encoding', DEFAULT_ENCODING)[0]
 
     # now for the filtering part
-    bbox_width  = (west-east)*1.2
+    if inverse: bbox_width = (east-west)*1.2
+    else: bbox_width  = (west-east)*1.2
     bbox_height = (south-north)*1.2
     if int(reverse):
         new_objects = reversed(objects)
@@ -68,8 +64,8 @@ def get(request, west, south, east, north, objects, encoding=None):
     if int(cluster):
         clusters = [[[] for x in range(10)] for y in range(10)]
         for object in new_objects:
-            obj_x = object.getPosition().coords[0]
-            obj_y = object.getPosition().coords[1]
+            obj_x = object.getPosition()[0]
+            obj_y = object.getPosition()[1]
             if not inverse:
                 x_pos = int( ((obj_x-east) /bbox_width) *10)
                 y_pos = int( ((obj_y-north)/bbox_height) *10)
@@ -97,12 +93,13 @@ def get(request, west, south, east, north, objects, encoding=None):
         print len(clusters)
         for row in clusters:
             for cluster in row:
-                lat_coords = [point.getPosition().coords[1] for point in cluster]
-                lng_coords = [point.getPosition().coords[0] for point in cluster]
+                lat_coords = [point.getPosition()[1] for point in cluster]
+                lng_coords = [point.getPosition()[0] for point in cluster]
                 if not len(lat_coords) or not len(lng_coords): continue
                 average = [sum(lat_coords)/float(len(lat_coords)),
                            sum(lng_coords)/float(len(lng_coords))]
-                east, north, west, south = GeometryCollection(*[point.getPosition() for point in cluster]).extent
+                east = min(lng_coords); west = max(lng_coords)
+                north = min(lat_coords); south = max(lat_coords)
                 bbox = [north, east, south, west]
 
                 cluster_data = {'type': 'Feature',
@@ -137,8 +134,8 @@ def get(request, west, south, east, north, objects, encoding=None):
         response_data = '<?xml version="1.0" encoding = "UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document>'
         for row in clusters:
             for cluster in row:
-                lat_coords = [point.getPosition().coords[1] for point in cluster]
-                lng_coords = [point.getPosition().coords[0] for point in cluster]
+                lat_coords = [point.getPosition()[1] for point in cluster]
+                lng_coords = [point.getPosition()[0] for point in cluster]
                 if not len(lat_coords) or not len(lng_coords): continue
                 response_data += '\n<Placemark>'
                 average = [sum(lat_coords)/float(len(lat_coords)),

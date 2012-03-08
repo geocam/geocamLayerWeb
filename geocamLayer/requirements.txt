@@ -1,0 +1,12 @@
+goal:
+ * complete stack where the sever side clustering looks like the client side clustering
+ * tutorial explaining how to set it up
+ * performance analysis
+  * no clustering
+  * client side clustering
+  * server-side clustering
+  * x-axis: # of features
+  * two y-var:
+   * data on wire
+   * amount of time needed to render map
+  * complete network link setup for kml

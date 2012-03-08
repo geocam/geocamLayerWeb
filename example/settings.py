@@ -21,11 +21,11 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'geocamLayer',
-        'USER': 'djangoadmin',
-        'PASSWORD': 'm34ultra',
-        'HOST': 'localhost',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'database.db',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
         'PORT': '',
     }
 }
@@ -106,5 +106,4 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.gis',
     'geocamLayer',
-    'django_websocket',
 )

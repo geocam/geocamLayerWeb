@@ -1,0 +1,18 @@
+Todo list for geocamlayer
+
+- Figure out tiling
+	- document protocol, interface behavior
+	- integration problem
+- Actually get kml working
+	- Top level link that will load the kml in gearth and do the right stuff
+
+
+Done list
+
+- Remove dependancy on geodjango
+	- Instead of point, lat/long fields
+
+Probably done list
+
+- Fix the documentation
+	- make install process as easy as possible
