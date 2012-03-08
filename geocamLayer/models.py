@@ -13,7 +13,7 @@ class BaseFeature(models.Model):
     # demo feature model demonstrating
     # what you need to implement
     def getPosition(self):
-        # in Point object
+        # in as tuple
         return (0,0)
     def getTimeStamp(self):
         # in a time.time() format
