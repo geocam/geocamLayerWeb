@@ -39,14 +39,14 @@ class Feature(BaseFeature):
                  timespan=datetime.timedelta(), name="Feature",
                  description="Simple feature", properties={}, *args, **kwargs):
         BaseFeature.__init__(self, *args, **kwargs)
-        self.position = position
+        self.lng, self.lat = position
         self.timestamp = timestamp
         self.timespan = timespan
         self.name = name
         self.description = description
         self.properties = properties
         
-    def getPosition(self): return self.position
+    def getPosition(self): return (self.lng,self.lat)
     def getTimeStamp(self): return self.timestamp
     def getTimeSpan(self): return self.timespan
     def getName(self): return self.name
