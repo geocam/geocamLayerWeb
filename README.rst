@@ -12,7 +12,8 @@ To get the included demo running:
 
 The server should now be running on localhost:8000. The web page should be a full-page google map, which should automatically load points and clusters as you move the map around. Clicking on a cluster should bring you down to a zoom level that includes all the points in the cluster.
 
-@section{Technical details}
+Technical Details
+-----------------
 
 The "get" function takes the request as a first argument and the list of points as the second. It has two encoding options, geojson and kml.
 
