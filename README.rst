@@ -1,7 +1,7 @@
 1st paragraph describes point
 2nd paragraph "here is the exact install instructions"
 
-The point of the geocamLayer project is to provide a server-side application that performs the tasks of managing & clustering points on a map, reducing to a minimum the client-side requirements in the area of processing power. This application provides a json and a kml interface, which both account for clustering automatically.
+The point of the geocamLayer project is to provide a server-side application that performs the tasks of managing & clustering points on a map, reducing to a minimum the client-side requirements in the area of processing power. This application provides a json and a kml interface, which both account for clustering automatically. The code itself is designed to be easy to integrate into existing projects, as the view method that generates the clusters is completely autonomous, and includes no database interactions. Documentation of the exact format is included below.
 
 To get the included demo running:
 
@@ -12,9 +12,7 @@ To get the included demo running:
 
 The server should now be running on localhost:8000. The web page should be a full-page google map, which should automatically load points and clusters as you move the map around. Clicking on a cluster should bring you down to a zoom level that includes all the points in the cluster.
 
-Documentation for the use of this clustering software
-
-The whole point of this clustering software is to be completely expandable without the need for modification of the code. The code as-is only needs to be provided with a list of objects that have the same functions as the ones in the models.py BaseFeature class. All of the clustering takes place within the "get" function, there is no database interaction whatsoever. This is in contrast to the Django system that this is based on, where most of the interactions are with databases.
+@section{Technical details}
 
 The "get" function takes the request as a first argument and the list of points as the second. It has two encoding options, geojson and kml.
 
@@ -82,14 +80,6 @@ A sample URL could be::
 The client side interface for the geojson is designed to be easy to read for gmap clients. The way that it is designed to be implemented is json parsing through an XMLHTTPRequest, which then pushes points or clusters depending on the subtype to the gmap interface. An example implementation is provided in the static folder.
 
 The positions and bounding boxes of the objects sent through the geojson are intended to work well with google maps, and are in the right order to enable direct loading of the points into the gmap. The bounds included in each cluster can be translated into LatLngBounds with no change in order, which can then be passed to the fitBounds method which will correctly zoom down to a point where you can see all the points in the cluster.
-
-To get the included demo running:
-
-1. Install django
-2. cd into example
-3. python manage.py syncdb
-4. python manage.py runserver
-5. demo is now running on localhost:8000
 
 .. o  __BEGIN_LICENSE__
 .. o  Copyright (C) 2008-2010 United States Government as represented by
