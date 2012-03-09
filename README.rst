@@ -1,48 +1,50 @@
+1st paragraph describes point
+2nd paragraph "here is the exact install instructions"
+
 Documentation for the use of this clustering software
 
 The whole point of this clustering software is to be completely expandable without the need for modification of the code. The code as-is only needs to be provided with a list of objects that have the same functions as the ones in the models.py BaseFeature class. All of the clustering takes place within the "get" function, there is no database interaction whatsoever. This is in contrast to the Django system that this is based on, where most of the interactions are with databases.
 
 The "get" function takes the request as a first argument and the list of points as the second. It has two encoding options, geojson and kml.
 
-The geojson is formatted as follows:
+The geojson is formatted as follows::
 
-
-{
-  "type": "FeatureCollection",
-  "features":
-  [
-    {"geometry": {
-      "type":"Point",
-      "coordinates":[
-        [
-          (lat-coordinate of feature),
-	  (lng-coordinate of feature)
-	]
+  {
+    "type": "FeatureCollection",
+    "features":
+    [
+      {"geometry": {
+        "type":"Point",
+        "coordinates":[
+          [
+            (lat-coordinate of feature),
+  	  (lng-coordinate of feature)
+  	]
+        ]
+      },
+      "properties": {
+        (for clusters)
+        "bbox": [
+          (north coordinate of bounding box containing points in cluster),
+  	(east coordinate),
+  	(south coordinate),
+  	(west coordinate)
+        ],
+        (for clusters:)
+        "numpoints":(number of points in cluster),
+        "subtype":"cluster"
+        (for other points:)
+        "timestamp":(timestamp of point),
+        "timespan":(timespan of point),
+        "name":(name of point),
+        "description":(description of point),
+        (all other properties that are provided by the getProperties function)
+      }
+      },
+      (all the other points on the map)
       ]
-    },
-    "properties": {
-      (for clusters)
-      "bbox": [
-        (north coordinate of bounding box containing points in cluster),
-	(east coordinate),
-	(south coordinate),
-	(west coordinate)
-      ],
-      (for clusters:)
-      "numpoints":(number of points in cluster),
-      "subtype":"cluster"
-      (for other points:)
-      "timestamp":(timestamp of point),
-      "timespan":(timespan of point),
-      "name":(name of point),
-      "description":(description of point),
-      (all other properties that are provided by the getProperties function)
-    }
-    },
-    (all the other points on the map)
-    ]
-}
-
+  }
+  
 The KML is formatted as follows:
 
 TODO: this section.
