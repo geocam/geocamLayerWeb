@@ -1,6 +1,17 @@
 1st paragraph describes point
 2nd paragraph "here is the exact install instructions"
 
+The point of the geocamLayer project is to provide a server-side application that performs the tasks of managing & clustering points on a map, reducing to a minimum the client-side requirements in the area of processing power. This application provides a json and a kml interface, which both account for clustering automatically.
+
+To get the included demo running:
+
+1. Install django
+2. cd into example
+3. python manage.py syncdb
+4. python manage.py runserver
+
+The server should now be running on localhost:8000. The web page should be a full-page google map, which should automatically load points and clusters as you move the map around. Clicking on a cluster should bring you down to a zoom level that includes all the points in the cluster.
+
 Documentation for the use of this clustering software
 
 The whole point of this clustering software is to be completely expandable without the need for modification of the code. The code as-is only needs to be provided with a list of objects that have the same functions as the ones in the models.py BaseFeature class. All of the clustering takes place within the "get" function, there is no database interaction whatsoever. This is in contrast to the Django system that this is based on, where most of the interactions are with databases.
