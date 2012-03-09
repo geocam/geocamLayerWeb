@@ -49,11 +49,11 @@ The KML is formatted as follows:
 
 TODO: this section.
 
-A sample server-side implementation of this could be:
+A sample server-side implementation of this could be::
 
-url_patterns += [
-    (r'^points/', 'views.get', {'objects':objects})
-]
+  url_patterns += [
+      (r'^points/', 'views.get', {'objects':objects})
+  ]
 
 The values passed to this "get" views are passed in the URL ("GET" parameters) and are as follows (all are optional):
 
@@ -64,9 +64,9 @@ start: start index
 end: end index
 reverse: 1 or 0 for yes or no, respectively
 
-A sample URL could be:
+A sample URL could be::
 
-http://www.server.com/point/?cluster=1&bbox=7.095248,-142.99263,46.496068,-101.13472
+  http://www.server.com/point/?cluster=1&bbox=7.095248,-142.99263,46.496068,-101.13472
 
 The client side interface for the geojson is designed to be easy to read for gmap clients. The way that it is designed to be implemented is json parsing through an XMLHTTPRequest, which then pushes points or clusters depending on the subtype to the gmap interface. An example implementation is provided in the static folder.
 
