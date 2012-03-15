@@ -1,16 +1,27 @@
 Introduction
 ------------
 
-The point of the geocamLayer project is to provide a server-side application that performs the tasks of managing & clustering points on a map, reducing to a minimum the client-side requirements in the area of processing power. This application provides a json and a kml interface, which both account for clustering automatically. The code itself is designed to be easy to integrate into existing projects, as the view method that generates the clusters is completely autonomous, and includes no database interactions. Documentation of the exact format is included below.
+The point of the geocamLayer project is to provide a server-side application that performs the tasks of managing and clustering points on a map, reducing to a minimum the client-side requirements in the area of processing power. This application provides a json and a kml interface, which both account for clustering automatically. The code itself is designed to be easy to integrate into existing projects, as the view method that generates the clusters is completely autonomous, and includes no database interactions. Documentation of the exact format is included below.
 
-To get the included demo running:
+Dependencies:
 
-1. Install django
-2. cd into example
-3. python manage.py syncdb
-4. python manage.py runserver
+ * Python_
+ * Django_
+ * Git_ (used to download this module; or just `grab a tarball`_)
 
-The server should now be running on localhost:8000. The web page should be a full-page google map, which should automatically load points and clusters as you move the map around. Clicking on a cluster should bring you down to a zoom level that includes all the points in the cluster.
+.. _python: http://python.org/download/
+.. _django: https://docs.djangoproject.com/en/dev/intro/install/
+.. _git: http://git-scm.com/download
+.. _grab a tarball: https://github.com/geocam/geocamLayerWeb/downloads
+
+Installation::
+
+  git clone http://github.com/geocam/geocamLayerWeb
+  cd geocamLayerWeb/example
+  ./manage.py syncdb
+  ./manage.py runserver
+
+The server should now be running on localhost:8000. The web page should be a full-page Google map, which should automatically load points and clusters as you move the map around. Clicking on a cluster should bring you down to a zoom level that includes all the points in the cluster.
 
 Technical Details
 -----------------
