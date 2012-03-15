@@ -1,0 +1,64 @@
+Tiling process
+
+/base_url/zoom/x/y.json
+
+zoom 0 is full world
+runs from -180 to 180 longitude
+runs from -90 to 270 latitude
+
+size of tile is 360/2**zoom level
+
+west end of tile = -180+(x*(size)/2)
+east end of tile = west end + size
+south = -90+(y*(size)/2)
+north = south + size
+
+three ways to represent data:
+      1. raw data store
+      2. pre-tile representation (optional, goal)
+      3. actual json tile
+
+cells per tile, must be even, 10x10, should not be hardcoded
+
+overall code structure:
+
+1. database implementation for data
+   1a. generate random test data
+   1b. use sqlite for now
+
+2. generating tiles
+   for pt in pts:
+       for tiles containing pt:
+       	   write pt to file
+   write out all tiles
+
+calculating which tiles a point is in:
+
+tile.west < point.lng < tile.east
+tile.south < point.lat < tile.north
+
+-180+(x*(360/(2**(z+1)))  = point.lng
+
+(x*(360/(2**(z+1))) = point.lng+180
+
+x = (point.lng+180)/(360/(2**(z+1)))
+y = (point.lat+ 90)/(360/(2**(z+1)))
+
+take floor x, you just got tile index!
+
+(using current settings for defaultSettings.py)
+
+for zoom in range(10):
+    xf = (point.lng+180)/(360/(2**(z+1)))
+    yf = (point.lat+ 90)/(360/(2**(z+1)))
+    xmax = math.floor(xf)
+    ymax = math.floor(yf)
+    xmin = max(0,xmax-1)
+    ymin = max(0,ymax-1)
+    xcell = math.floor(((xf-xmax)*CELLS_PER_TILE)*2)
+    ycell = math.floor(((yf-ymax)*CELLS_PER_TILE)*2)
+    for x in range(xmin,xmax+1):
+    	for y in range(ymin,ymax+1):
+	    tile = tiles[zoom,x,y]
+	    tile[xcell,ycell].process(point)
+

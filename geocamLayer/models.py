@@ -35,26 +35,26 @@ class BaseFeature(models.Model):
         return ""
 
 class Feature(BaseFeature):
-    def __init__(self, position=(0,0), timestamp=time.time(),
+    def __init__(self, lng, lat, timestamp=time.time(),
                  timespan=datetime.timedelta(), name="Feature",
-                 description="Simple feature", properties={}, *args, **kwargs):
+                 description="Simple feature", *args, **kwargs):# properties={}, *args, **kwargs):
         BaseFeature.__init__(self, *args, **kwargs)
-        self.lng, self.lat = position
+        self.lng, self.lat = lng,lat
         self.timestamp = timestamp
         self.timespan = timespan
         self.name = name
         self.description = description
-        self.properties = properties
+        #self.properties = properties
         
     def getPosition(self): return (self.lng,self.lat)
     def getTimeStamp(self): return self.timestamp
     def getTimeSpan(self): return self.timespan
     def getName(self): return self.name
     def getDescriptionHTML(self): return self.description
-    def getProperties(self): return self.properties
+    def getProperties(self): return {} # self.properties
 
 class RandomFeature(Feature):
     def __init__(self, *args, **kwargs):
-        Feature.__init__(self, (random.randint(-180,180), random.randint(-90,90)),
+        Feature.__init__(self, random.randint(-180,180), random.randint(-90,90),
                          time.time(), datetime.timedelta(random.randint(0,3)),
-                         "Random Feature", "Random Feature", {}, *args, **kwargs)
+                         "Random Feature", "Random Feature", *args, **kwargs)# {}, *args, **kwargs)
