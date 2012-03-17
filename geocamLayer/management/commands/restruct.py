@@ -2,7 +2,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from geocamLayer import models
 from django.conf import settings
-import os, os.path, math
+import os, os.path, math, json
 
 try: import cPickle as pickle
 except ImportError: import pickle
@@ -15,7 +15,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.stdout.write("Getting all objects...\n")
-        features = models.BaseFeature.objects.all()
+        features = models.Feature.objects.all()
         self.stdout.write("%s objects in total\n" % len(features))
         root = os.path.join(settings.MEDIA_ROOT, "tiles")
         tiles = {}
@@ -23,6 +23,7 @@ class Command(BaseCommand):
         for point in features:
             lng,lat = point.getPosition()
             for zoom in xrange(10):
+                # fragment this
                 xf = float(lng+180)/(360./(2**(zoom+1)))
                 yf = float(lat+ 90)/(360./(2**(zoom+1)))
                 xmax = math.floor(xf)
@@ -36,18 +37,27 @@ class Command(BaseCommand):
                     if not os.path.exists(tile_path):
                         os.makedirs(tile_path)
                     for y in range(int(ymin),int(ymax+1)):
-                        tile_file = os.path.join(tile_path, str(y))
+                        tile_file = os.path.join(tile_path, str(y)+'.json')
                         if tile_file in tiles:
                             tile = tiles[tile_file]
                         elif os.path.exists(tile_file):
-                            tile = pickle.load(open(tile_file, 'rb'))
+                            tile = json.load(open(tile_file))
                         else:
                             tile = {}
-                        if (xcell,ycell) not in tile:
-                            tile[(xcell,ycell)] = []
-                        tile[(xcell,ycell)].append(point)
+                        if xcell not in tile:
+                            tile[xcell] = {}
+                        if ycell not in tile[xcell]:
+                            tile[xcell][ycell] = []
+                        point_data = {
+                            'type':'Point',
+                            'coordinates':point.getPosition(),
+                            'timestamp':str(point.getTimeStamp()),
+                            'timespan':str(point.getTimeSpan()),
+                            'name':str(point.getName()),
+                            'description':point.getDescriptionHTML()}
+                        tile[xcell][ycell].append(point_data)
                         tiles[tile_file] = tile
         self.stdout.write("Writing out...\n")
         for tile_path in tiles:
-            pickle.dump(tiles[tile_path],open(tile_path,'wb'))
+            json.dump(tiles[tile_path],open(tile_path, 'w'))
         self.stdout.write("Done.\n")

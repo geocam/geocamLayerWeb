@@ -3,6 +3,8 @@ Todo list for geocamlayer
 - Figure out tiling
 	- document protocol, interface behavior
 	- integration problem
+	- test suite
+	- client side
 - Actually get kml working
 	- Top level link that will load the kml in gearth and do the right stuff
 
