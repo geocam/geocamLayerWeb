@@ -18,10 +18,10 @@ class Command(BaseCommand):
                     ),
         )
 
+    @transaction.commit_manually
     def handle(self, *args, **options):
         stdout = sys.stdout
         sys.stdout = self.stdout
-        transaction.commit_manually()
         if not args:
             print "No args found, using 1000 points"
             numpoints = 1000
