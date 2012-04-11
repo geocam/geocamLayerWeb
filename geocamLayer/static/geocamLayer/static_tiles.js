@@ -2,7 +2,7 @@ function initialize() {
     window.map = new google.maps.Map(document.getElementById("map_canvas"), {zoom: 6, mapTypeId: google.maps.MapTypeId.ROADMAP});
     //google.maps.event.addListener(map,'bounds_changed',getClusters);
     window.points = new Array();
-    //window.bboxes = new Object();
+    window.bboxes = new Object();
     window.conn = null;
     //window.updating = false;
     //window.concurent = false;
@@ -75,14 +75,20 @@ function processTile() {
     parsed = JSON.parse(conn.responseText);
     clearPoints();
     console.log(parsed);
-    for (xcell in parsed) {
-	for (ycell in parsed[xcell]) {
-	    for (point in parsed[xcell][ycell]) {
-		pos = point['coordinates'];
-		console.log(parsed[xcell][ycell][point]);
-		marker = new google.maps.Market({position:new google.maps.LatLng(pos)});
-		points[points.length] = marker;
+    for (x in parsed['features']) {
+	cluster = parsed['features'][x];
+	console.log(cluster);
+	pos = cluster['geometry']['coordinates'].toString().split(',');
+	marker = new google.maps.Marker({position:new google.maps.LatLng(pos[0], pos[1]), map:map, clickable:true, icon:new google.maps.MarkerImage(url='/static/arrow.png')});
+	bboxes[new google.maps.LatLng(pos[0], pos[1])] = cluster['properties']['bbox'];
+	google.maps.event.addListener(marker,"click",function(event){
+		clearPoints();
+		bbox = bboxes[event.latLng];
+		bounds = new google.maps.LatLngBounds(new google.maps.LatLng(bbox[0],bbox[1]),
+						      new google.maps.LatLng(bbox[2],bbox[3]));
+		map.fitBounds(bounds);
 	    }
-	}
+	    );
+	points[cluster.length] = marker;
     }
 }
