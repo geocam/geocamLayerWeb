@@ -1,6 +1,7 @@
 function initialize() {
     window.map = new google.maps.Map(document.getElementById("map_canvas"), {zoom: 6, mapTypeId: google.maps.MapTypeId.ROADMAP});
-    //google.maps.event.addListener(map,'bounds_changed',getClusters);
+    google.maps.event.addListener(map,'bounds_changed',boundsChanged);
+    //google.maps.event.addListener(map,'bounds_changed',clearPoints);
     window.points = new Array();
     window.bboxes = new Object();
     window.conn = null;
@@ -44,7 +45,38 @@ function initialize() {
     }
 
     // load a tile to test stuff out
-    loadTile(0,0,0);
+    //loadTile(0,0,0);
+    //loadTile(0,0,1);
+
+    //loadTile(0,1,0);
+    //loadTile(0,1,1);
+    //clearPoints();
+}
+
+function boundsChanged() {
+    bounds = map.getBounds();
+    south = bounds.getSouthWest().lat();
+    west = bounds.getSouthWest().lng();
+    north = bounds.getNorthEast().lat();
+    east = bounds.getNorthEast().lng();
+    size = Math.max(south-north, east-west);
+
+    zoom = Math.ceil(Math.log(360/size)/Math.log(2));
+    if (isNaN(zoom)) zoom = 1;
+    tile_size = 360/Math.pow(2,zoom)
+
+    west_x = Math.floor((west-(-180))/tile_size)
+    south_y = Math.floor((south-(-90))/tile_size)
+    east_x = Math.ceil((east-(-180))/tile_size)
+    north_y = Math.ceil((east-(-180))/tile_size)
+
+    clearPoints();
+
+    for (x=west_x; x < east_x; x++) {
+	for (y=south_y; y < north_y; y++) {
+	    loadTile(zoom,x,y);
+	}
+    }
 }
 
 function loadTile(zoom,x,y) {
@@ -55,9 +87,12 @@ function loadTile(zoom,x,y) {
 }
 
 function clearPoints() {
+    console.log("clearing points");
     for (x=0;x<points.length;x++) {
 	points[x].setVisible(false);
     }
+    points = new Array();
+    bboxes = new Object();
 }
 
 function processTile() {
@@ -73,11 +108,8 @@ function processTile() {
 	return;
     }
     parsed = JSON.parse(conn.responseText);
-    clearPoints();
-    console.log(parsed);
     for (x in parsed['features']) {
 	cluster = parsed['features'][x];
-	console.log(cluster);
 	pos = cluster['geometry']['coordinates'].toString().split(',');
 	marker = new google.maps.Marker({position:new google.maps.LatLng(pos[0], pos[1]), map:map, clickable:true, icon:new google.maps.MarkerImage(url='/static/arrow.png')});
 	bboxes[new google.maps.LatLng(pos[0], pos[1])] = cluster['properties']['bbox'];
@@ -89,6 +121,6 @@ function processTile() {
 		map.fitBounds(bounds);
 	    }
 	    );
-	points[cluster.length] = marker;
+	points[points.length] = marker;
     }
 }
