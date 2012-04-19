@@ -40,5 +40,7 @@ class Command(BaseCommand):
             feature = Feature.randomFeature()
             feature.save()
         print
+        print "Committing..."
         transaction.commit()
+        print "Done."
         sys.stdout = stdout

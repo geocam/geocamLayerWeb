@@ -5,6 +5,9 @@ function initialize() {
     window.points = new Array();
     window.bboxes = new Object();
     window.conn = null;
+    window.currentZoom = null;
+    window.currentX = new Array();
+    window.currentY = new Array();
     //window.updating = false;
     //window.concurent = false;
 
@@ -63,20 +66,25 @@ function boundsChanged() {
 
     zoom = Math.ceil(Math.log(360/size)/Math.log(2));
     if (isNaN(zoom)) zoom = 1;
-    tile_size = 360/Math.pow(2,zoom)
+    tile_size = 360/Math.pow(2,zoom);
 
-    west_x = Math.floor((west-(-180))/tile_size)
-    south_y = Math.floor((south-(-90))/tile_size)
-    east_x = Math.ceil((east-(-180))/tile_size)
-    north_y = Math.ceil((east-(-180))/tile_size)
+    x = Math.floor((west-(-180))/tile_size)*2;
+    y = Math.floor((south-(-90))/tile_size)*2;
 
-    clearPoints();
-
-    for (x=west_x; x < east_x; x++) {
-	for (y=south_y; y < north_y; y++) {
-	    loadTile(zoom,x,y);
-	}
+    if (currentZoom != zoom) {
+	clearPoints();
+	currentZoom = zoom;
     }
+
+    if (currentZoom != zoom ||
+	currentX.indexOf(x) == -1 ||
+	currentY.indexOf(y) == -1
+	) {
+	loadTile(zoom,x,y);
+	currentX[currentX.length] = x;
+	currentY[currentY.length] = y;
+    }
+
 }
 
 function loadTile(zoom,x,y) {
@@ -93,6 +101,8 @@ function clearPoints() {
     }
     points = new Array();
     bboxes = new Object();
+    currentX = new Array();
+    currentY = new Array();
 }
 
 function processTile() {
@@ -111,16 +121,21 @@ function processTile() {
     for (x in parsed['features']) {
 	cluster = parsed['features'][x];
 	pos = cluster['geometry']['coordinates'].toString().split(',');
-	marker = new google.maps.Marker({position:new google.maps.LatLng(pos[0], pos[1]), map:map, clickable:true, icon:new google.maps.MarkerImage(url='/static/arrow.png')});
-	bboxes[new google.maps.LatLng(pos[0], pos[1])] = cluster['properties']['bbox'];
-	google.maps.event.addListener(marker,"click",function(event){
-		clearPoints();
-		bbox = bboxes[event.latLng];
-		bounds = new google.maps.LatLngBounds(new google.maps.LatLng(bbox[0],bbox[1]),
-						      new google.maps.LatLng(bbox[2],bbox[3]));
-		map.fitBounds(bounds);
-	    }
-	    );
-	points[points.length] = marker;
+	if (cluster['properties']['subtype'] == 'point') {
+	    marker = new google.maps.Marker({position:new google.maps.LatLng(pos[0], pos[1]), map:map});
+	    points[points.length] = marker;
+	} else {
+	    marker = new google.maps.Marker({position:new google.maps.LatLng(pos[0], pos[1]), map:map, clickable:true, icon:new google.maps.MarkerImage(url='/static/arrow.png')});
+	    bboxes[new google.maps.LatLng(pos[0], pos[1])] = cluster['properties']['bbox'];
+	    google.maps.event.addListener(marker,"click",function(event){
+		    bbox = bboxes[event.latLng];
+		    console.log(bbox);
+		    bounds = new google.maps.LatLngBounds(new google.maps.LatLng(bbox[0],bbox[1]),
+							  new google.maps.LatLng(bbox[2],bbox[3]));
+		    map.fitBounds(bounds);
+		}
+		);
+	    points[points.length] = marker;
+	}
     }
 }
