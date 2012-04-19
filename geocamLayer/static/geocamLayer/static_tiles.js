@@ -68,8 +68,9 @@ function boundsChanged() {
     if (isNaN(zoom)) zoom = 1;
     tile_size = 360/Math.pow(2,zoom);
 
-    x = Math.floor((west-(-180))/tile_size)*2;
-    y = Math.floor((south-(-90))/tile_size)*2;
+    center = map.getCenter();
+    x = Math.floor((center.lng()-(-180))/tile_size)*2;
+    y = Math.floor((center.lat()-(-90))/tile_size)*2;
 
     if (currentZoom != zoom) {
 	clearPoints();
@@ -89,6 +90,7 @@ function boundsChanged() {
 
 function loadTile(zoom,x,y) {
     conn = new XMLHttpRequest();
+    console.log("getting /staci/tiles/"+zoom+"/"+x+"/"+y+".json", true);
     conn.open("GET", "/static/tiles/"+zoom+"/"+x+"/"+y+".json", true);
     conn.onreadystatechange = processTile;
     conn.send(null);
@@ -122,17 +124,18 @@ function processTile() {
 	cluster = parsed['features'][x];
 	pos = cluster['geometry']['coordinates'].toString().split(',');
 	if (cluster['properties']['subtype'] == 'point') {
-	    marker = new google.maps.Marker({position:new google.maps.LatLng(pos[0], pos[1]), map:map});
+	    marker = new google.maps.Marker({position:new google.maps.LatLng(pos[1], pos[0]), map:map});
 	    points[points.length] = marker;
 	} else {
-	    marker = new google.maps.Marker({position:new google.maps.LatLng(pos[0], pos[1]), map:map, clickable:true, icon:new google.maps.MarkerImage(url='/static/arrow.png')});
-	    bboxes[new google.maps.LatLng(pos[0], pos[1])] = cluster['properties']['bbox'];
+	    marker = new google.maps.Marker({position:new google.maps.LatLng(pos[1], pos[0]), map:map, clickable:true, icon:new google.maps.MarkerImage(url='/static/arrow.png')});
+	    bboxes[new google.maps.LatLng(pos[1], pos[0])] = cluster['properties']['bbox'];
 	    google.maps.event.addListener(marker,"click",function(event){
-		    bbox = bboxes[event.latLng];
-		    console.log(bbox);
-		    bounds = new google.maps.LatLngBounds(new google.maps.LatLng(bbox[0],bbox[1]),
-							  new google.maps.LatLng(bbox[2],bbox[3]));
-		    map.fitBounds(bounds);
+		bbox = bboxes[event.latLng];
+		console.log(bbox);
+		bounds = new google.maps.LatLngBounds(new google.maps.LatLng(bbox[0],bbox[1]),
+						      new google.maps.LatLng(bbox[2],bbox[3]));
+		console.log(bounds);
+		map.fitBounds(bounds);
 		}
 		);
 	    points[points.length] = marker;

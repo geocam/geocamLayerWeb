@@ -1,10 +1,9 @@
 Todo list for geocamlayer
 
-- Figure out tiling
-	- document protocol, interface behavior
-	- integration problem
-	- test suite
-	- client side
+- Fix bugs
+
+- Figure out clustering, once and for all.
+
 - Actually get kml working
 	- Top level link that will load the kml in gearth and do the right stuff
 
@@ -14,7 +13,20 @@ Done list
 - Remove dependancy on geodjango
 	- Instead of point, lat/long fields
 
-Probably done list
+- Figure out tiling
+	- document protocol, interface behavior
+	- integration problem
+	- test suite
+	- client side
 
 - Fix the documentation
 	- make install process as easy as possible
+
+Bug List
+
+- We still have issues with tiling
+- Largest zoom level has problems
+- We need to handle cases in the javascript where the zoom level is past what exists (i.e. zoom 11)
+- Maybe we need to load the next biggest zoom level
+- Not loading correct tile on zoom change
+- Clusters are still being weird

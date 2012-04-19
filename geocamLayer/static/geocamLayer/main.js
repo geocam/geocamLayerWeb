@@ -87,7 +87,7 @@ function setClusters() {
 	else {
 	    marker = new google.maps.Marker({position:new google.maps.LatLng(pos[0], pos[1]), map:map, clickable:true, icon:new google.maps.MarkerImage(url='/static/arrow.png')});
 	    bboxes[new google.maps.LatLng(pos[0], pos[1])] = cluster['properties']['bbox'];
-	    google.maps.event.addListener(marker,"click",function(event){clearClusters();bbox=bboxes[event.latLng];bounds = new google.maps.LatLngBounds(new google.maps.LatLng(bbox[0],bbox[1]),new google.maps.LatLng(bbox[2],bbox[3]));map.fitBounds(bounds);});
+	    google.maps.event.addListener(marker,"click",function(event){clearClusters();bbox=bboxes[event.latLng];bounds = new google.maps.LatLngBounds(new google.maps.LatLng(bbox[0],bbox[1]),new google.maps.LatLng(bbox[2],bbox[3]));console.log(bbox);console.log(bounds);map.fitBounds(bounds);});
 	    clusters[clusters.length] = marker;
 	}
     }

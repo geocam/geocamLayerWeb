@@ -23,16 +23,18 @@ class Cluster(object):
         self.numPoints += 1
         if self.numPoints == 1 or self.finalZoom:
             self.points.append(point)
+        else:
+            self.points = []
         x, y = point.getPosition()
         self.xSum += x
         self.ySum += y
-        if self.west is None or x < self.west:
-            self.west = x
-        if self.east is None or x > self.east:
+        if self.east is None or x < self.east:
             self.east = x
-        if self.south is None or y < self.south:
+        if self.west is None or x > self.west:
+            self.west = x
+        if self.south is None or y > self.south:
             self.south = y
-        if self.north is None or y > self.north:
+        if self.north is None or y < self.north:
             self.north = y
 
     def get_json(self):
