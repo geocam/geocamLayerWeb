@@ -1,7 +1,15 @@
-Introduction
-------------
 
-The point of the geocamLayer project is to provide a server-side application that performs the tasks of managing and clustering points on a map, reducing to a minimum the client-side requirements in the area of processing power. This application provides a json and a kml interface, which both account for clustering automatically. The code itself is designed to be easy to integrate into existing projects, as the view method that generates the clusters is completely autonomous, and includes no database interactions. Documentation of the exact format is included below.
+GeocamLayer is a library for web mapping that enables efficient browsing
+of massive sets of map placemarks.
+
+Its Python/Django server component provides a map feed which answers
+location-specific queries. When the query covers a wide map area, it
+performs server-side clustering of placemarks to keep the response size
+bounded regardless of the overall size of the data set.
+
+Its JavaScript client component, built on the Google Maps API,
+automatically performs the queries needed to populate the map with
+placemarks and clusters based on the map viewport.
 
 Dependencies:
 
