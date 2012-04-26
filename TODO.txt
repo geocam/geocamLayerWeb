@@ -24,9 +24,9 @@ Done list
 
 Bug List
 
-- We still have issues with tiling
+- tile loading is still tempremental
 - Largest zoom level has problems
-- We need to handle cases in the javascript where the zoom level is past what exists (i.e. zoom 11)
+- points are not showing up consistently for some reason
 - Maybe we need to load the next biggest zoom level
 - Not loading correct tile on zoom change
 - Clusters are still being weird

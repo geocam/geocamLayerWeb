@@ -8,7 +8,7 @@ function initialize() {
     window.currentZoom = null;
     window.currentX = new Array();
     window.currentY = new Array();
-    //window.updating = false;
+    window.updating = false;
     //window.concurent = false;
 
     // Try W3C Geolocation (Preferred)
@@ -56,7 +56,8 @@ function initialize() {
     //clearPoints();
 }
 
-function boundsChanged() {
+function boundsChanged(start) {
+    if (typeof(map.getBounds()) == 'undefined') {return;}
     bounds = map.getBounds();
     south = bounds.getSouthWest().lat();
     west = bounds.getSouthWest().lng();
@@ -65,7 +66,10 @@ function boundsChanged() {
     size = Math.max(south-north, east-west);
 
     zoom = Math.ceil(Math.log(360/size)/Math.log(2));
-    if (isNaN(zoom)) zoom = 1;
+    if (isNaN(zoom)) zoom = 0;
+    zoom -= 1;
+    if (zoom < 0) zoom = 1
+    if (zoom > 9) zoom = 9;
     tile_size = 360/Math.pow(2,zoom);
 
     center = map.getCenter();
@@ -90,7 +94,7 @@ function boundsChanged() {
 
 function loadTile(zoom,x,y) {
     conn = new XMLHttpRequest();
-    console.log("getting /staci/tiles/"+zoom+"/"+x+"/"+y+".json", true);
+    console.log("getting /static/tiles/"+zoom+"/"+x+"/"+y+".json", true);
     conn.open("GET", "/static/tiles/"+zoom+"/"+x+"/"+y+".json", true);
     conn.onreadystatechange = processTile;
     conn.send(null);
