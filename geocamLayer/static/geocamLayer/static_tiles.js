@@ -47,6 +47,8 @@ function initialize() {
 	map.setCenter(initialLocation);
     }
 
+    boundsChanged();
+
     // load a tile to test stuff out
     //loadTile(0,0,0);
     //loadTile(0,0,1);
@@ -73,8 +75,11 @@ function boundsChanged(start) {
     tile_size = 360/Math.pow(2,zoom);
 
     center = map.getCenter();
-    x = Math.floor((center.lng()-(-180))/tile_size)*2;
-    y = Math.floor((center.lat()-(-90))/tile_size)*2;
+    x = Math.floor((center.lng()-(-180))/(tile_size/2));
+    y = Math.floor((center.lat()-(-90))/(tile_size/2));
+
+    document.title="Static Tile HTML Test - Current Tile: "+zoom+"/"+x+"/"+y
+    console.log("Current Tile: "+zoom+"/"+x+"/"+y);
 
     if (currentZoom != zoom) {
 	clearPoints();
@@ -102,8 +107,8 @@ function loadTile(zoom,x,y) {
 
 function clearPoints() {
     console.log("clearing points");
-    for (x=0;x<points.length;x++) {
-	points[x].setVisible(false);
+    for (p=0;p<points.length;p++) {
+	points[p].setVisible(false);
     }
     points = new Array();
     bboxes = new Object();
