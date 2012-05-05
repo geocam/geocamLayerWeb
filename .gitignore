@@ -4,8 +4,12 @@
 *~
 /example/dev.db
 /example/example.db
+/example/database.db
 /docs/_build/
 /pip-log.txt
 /static/js/*.r*.js
 /static/css/*.r*.css
 /geocamLayer/build
+/geocamLayer/static/geocamLayer/tiles
+/example/sourceme.sh
+/data

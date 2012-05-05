@@ -4,10 +4,13 @@
 # All Rights Reserved.
 # __END_LICENSE__
 
-#from django.contrib.gis.db import models
-#from django.contrib.gis.geos import Point
+import datetime
+import time
+import random
+import math
+
 from django.db import models
-import datetime, time, random
+
 
 class BaseFeature(models.Model):
     # demo feature model demonstrating
@@ -44,6 +47,10 @@ class Feature(BaseFeature):
     timespan = models.FloatField(null=True, blank=True)
     name = models.CharField(max_length=80)
     description = models.TextField()
+    cell = models.ForeignKey('QuadTreeCell', null=True, blank=True)
+
+    def __unicode__(self):
+        return u'Feature "%s" (%.6f, %.6f)' % (self.name, self.lng, self.lat)
 
     @staticmethod
     def randomFeature():
@@ -62,3 +69,85 @@ class Feature(BaseFeature):
     def getName(self): return self.name
     def getDescriptionHTML(self): return self.description
     def getProperties(self): return {} # self.properties
+
+class QuadTreeCell(models.Model):
+    zoom = models.PositiveIntegerField()
+    x = models.PositiveIntegerField()
+    y = models.PositiveIntegerField()
+    count = models.PositiveIntegerField(default=0)
+    isLeaf = models.BooleanField(default=True)
+    # centroid: lng, lat
+    lng = models.FloatField(default=0.0)
+    lat = models.FloatField(default=0.0)
+    # bbox: west, south, east, north
+    west = models.FloatField(null=True, blank=True)
+    south = models.FloatField(null=True, blank=True)
+    east = models.FloatField(null=True, blank=True)
+    north = models.FloatField(null=True, blank=True)
+
+    class Meta:
+        ordering = ('zoom', 'x', 'y')
+
+    def __unicode__(self):
+        return u'QuadTreeCell (%d, %d, %d) count=%d' % (self.zoom, self.x, self.y, self.count)
+
+    @staticmethod
+    def getSizeForZoom(zoom):
+        return 360.0 / (2.0 ** zoom)
+
+    @staticmethod
+    def getIndexAtLonLat(zoom, lonLat):
+        size = QuadTreeCell.getSizeForZoom(zoom)
+        lng, lat = lonLat
+        x = int((lng - (-180)) / size)
+        y = int((lat - (-90)) / size)
+        return (zoom, x, y)
+
+    @staticmethod
+    def getCellAtIndex(coords):
+        zoom, x, y = coords
+        cell, _created = QuadTreeCell.objects.get_or_create(zoom=zoom, x=x, y=y)
+        return cell
+
+    @staticmethod
+    def getCellAtLonLat(zoom, lonLat):
+        return (QuadTreeCell.getCellAtIndex
+                (QuadTreeCell.getIndexAtLonLat(zoom, lonLat)))
+
+    def getSize(self):
+        return QuadTreeCell.getSizeForZoom(self.zoom)
+
+    def getMinCorner(self):
+        size = self.getSize()
+        return (-180 + self.x * size,
+                -90 + self.y * size)
+
+    def getBounds(self):
+        size = self.getSize()
+        west, south = self.getMinCorner()
+        return (west, south, west + size, south + size)
+
+    def updateStats(self, feature):
+        self.lng = (self.count * self.lng + feature.lng) / (self.count + 1)
+        self.lat = (self.count * self.lat + feature.lat) / (self.count + 1)
+
+        if self.count:
+            self.west = min(self.west, feature.lng)
+            self.south = min(self.south, feature.lat)
+            self.east = max(self.east, feature.lng)
+            self.north = max(self.north, feature.lat)
+        else:
+            self.west = feature.lng
+            self.south = feature.lat
+            self.east = feature.lng
+            self.north = feature.lat
+
+        self.count += 1
+
+    def getDiameter(self):
+        if self.count:
+            dx = self.east - self.west
+            dy = self.north - self.south
+            return math.sqrt(dx**2 + dy**2)
+        else:
+            return 0

@@ -9,8 +9,8 @@
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 import os, sys
-APP = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-PROJ_ROOT = os.path.abspath(os.path.dirname(__file__))
+APP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJ_ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(APP)
 
 ADMINS = (
@@ -22,7 +22,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'database.db',
+        'NAME': os.path.join(PROJ_ROOT, 'database.db'),
         'USER': '',
         'PASSWORD': '',
         'HOST': '',

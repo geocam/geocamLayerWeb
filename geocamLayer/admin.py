@@ -4,4 +4,25 @@
 # All Rights Reserved.
 # __END_LICENSE__
 
-from django.contrib.gis import admin
+from django.contrib import admin
+
+from geocamLayer.models import Feature, QuadTreeCell
+
+class FeatureAdmin(admin.ModelAdmin):
+    list_display = ('lat',
+                    'lng',
+                    'name',
+                    'description',
+                    'cell')
+
+class QuadTreeCellAdmin(admin.ModelAdmin):
+    list_display = ('zoom',
+                    'x',
+                    'y',
+                    'count',
+                    'isLeaf',
+                    'lng',
+                    'lat')
+
+admin.site.register(Feature, FeatureAdmin)
+admin.site.register(QuadTreeCell, QuadTreeCellAdmin)
