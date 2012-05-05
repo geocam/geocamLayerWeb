@@ -8,6 +8,8 @@
 import sys
 import itertools
 
+from django.db import transaction
+
 from geocamLayer.noaaExampleParser import readNoaaWeatherStations
 from geocamLayer.quadTree import QuadTree
 from geocamLayer.models import Feature, QuadTreeCell
@@ -22,22 +24,29 @@ def importFeatures(tree, features, maxNumFeatures):
         sys.stdout.flush()
 
 
+@transaction.commit_manually
+def cleanData():
+    print 'deleting old data'
+    # for loops are a work around for bulk delete problem in sqlite
+    # with objects.all().delete()
+    for f in Feature.objects.all():
+        f.delete()
+    for q in QuadTreeCell.objects.all():
+        q.delete()
+    transaction.commit()
+
+
 def importData(opts):
     if opts.clean:
-        print 'deleting old data'
-        # for loops are a work around for bulk delete problem in sqlite
-        # with objects.all().delete()
-        for f in Feature.objects.all():
-            f.delete()
-        for q in QuadTreeCell.objects.all():
-            q.delete()
+        cleanData()
 
     tree = QuadTree()
     if opts.noaa:
         sys.stdout.write('noaa import')
         importFeatures(tree, readNoaaWeatherStations(opts.noaa), opts.maxNumFeatures)
-        print
-        print
+    tree.finish()
+    print
+    print
     tree.debugStats()
 
 

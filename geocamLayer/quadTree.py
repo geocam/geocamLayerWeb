@@ -4,7 +4,10 @@
 # All Rights Reserved.
 # __END_LICENSE__
 
+import sys
 import math
+
+from django.db import transaction
 
 from geocamLayer.models import Feature, QuadTreeCell
 
@@ -18,7 +21,20 @@ MAX_ZOOM = 26
 
 class QuadTree(object):
     def __init__(self):
-        self.root = QuadTreeCell.getCellAtIndex((0, 0, 0))
+        self.cells = {}
+        self.features = []
+        self.root = self.getCellAtIndex((0, 0, 0))
+
+    def getCellAtIndex(self, index):
+        if index in self.cells:
+            cell = self.cells[index]
+        else:
+            zoom, x, y = index
+            cell = self.cells.setdefault(index, QuadTreeCell(zoom=zoom, x=x, y=y))
+        return cell
+
+    def getCellAtLonLat(self, zoom, lonLat):
+        return self.getCellAtIndex(QuadTreeCell.getIndexAtLonLat(zoom, lonLat))
 
     def addFeature(self, feature):
         self.addFeatureToCell(feature, self.root)
@@ -28,27 +44,38 @@ class QuadTree(object):
 
         if cell.isLeaf:
             feature.cell = cell
-            feature.save()
+            self.features.append(feature)
+            if not hasattr(cell, 'features'):
+                cell.features = []
+            cell.features.append(feature)
 
             if cell.count >= MAX_FEATURES_PER_CELL and cell.zoom < MAX_ZOOM - 1:
                 self.splitCell(cell)
         else:
             self.addFeatureToZoom(feature, cell.zoom + 1)
 
-        cell.save()
-
     def addFeatureToZoom(self, feature, zoom):
-        cell = (QuadTreeCell.getCellAtLonLat
+        cell = (self.getCellAtLonLat
                 (zoom, (feature.lng, feature.lat)))
         self.addFeatureToCell(feature, cell)
 
-    def createCell(self, zoom, x, y):
-        return QuadTreeCell.objects.create(zoom=zoom, x=x, y=y)
-
     def splitCell(self, cell):
         cell.isLeaf = False
-        for feature in Feature.objects.filter(cell=cell):
+        for feature in cell.features:
             self.addFeatureToZoom(feature, cell.zoom + 1)
+
+    @transaction.commit_manually
+    def finish(self):
+        for cell in self.cells.itervalues():
+            cell.save()
+            sys.stdout.write('c')
+            sys.stdout.flush()
+        transaction.commit()
+        for feature in self.features:
+            feature.save()
+            sys.stdout.write('f')
+            sys.stdout.flush()
+        transaction.commit()
 
     def debugStats(self):
         print '=== DEBUG STATS ==='
