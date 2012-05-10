@@ -4,6 +4,8 @@ Todo list for geocamlayer
 
 - Figure out clustering, once and for all.
 
+- Use JQuerry moar
+
 - Actually get kml working
 	- Top level link that will load the kml in gearth and do the right stuff
 
@@ -23,10 +25,11 @@ Done list
 	- make install process as easy as possible
 
 Bug List
-
-- tile loading is still tempremental
-  - this has gotten better, still not very good
 - clustering has issues
   - as the zoom level increases, it gets worse
   - points are not showing up consistently for some reason
 - Clusters are still being weird
+
+possibilities
+
+- not having indent = 4 on the json

@@ -12,16 +12,17 @@ CELLS_PER_TILE = 10
 NUMBER_ZOOMS = 10
 
 class Cluster(object):
-    def __init__(self, finalZoom = False):
+    def __init__(self, finalZoom = False, cluster=True):
         self.numPoints = 0
         self.xSum, self.ySum = 0,0
         self.south = self.west = self.east = self.north = None
         self.points = []
         self.finalZoom = finalZoom
+        self.cluster = cluster
 
     def add_point(self, point):
         self.numPoints += 1
-        if self.numPoints == 1 or self.finalZoom:
+        if self.numPoints == 1 or self.finalZoom or not self.cluster:
             self.points.append(point)
         else:
             self.points = []
@@ -39,7 +40,7 @@ class Cluster(object):
 
     def get_json(self):
         data = []
-        if self.numPoints > 1 and not self.finalZoom:
+        if self.numPoints > 1 and not self.finalZoom and self.cluster:
             data.append({'type': 'Feature',
                          'geometry': {
                         'type': 'Point',
