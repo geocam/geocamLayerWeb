@@ -13,6 +13,8 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 #from django.contrib.gis.geos import Polygon, Point, GeometryCollection
 import json
 
+from models import *
+
 DEFAULT_BOUNDS = (180,180,-180,-180)
 DEFAULT_START = [0]
 DEFAULT_END = [-1]

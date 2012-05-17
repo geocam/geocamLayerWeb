@@ -151,3 +151,5 @@ class QuadTreeCell(models.Model):
             return math.sqrt(dx**2 + dy**2)
         else:
             return 0
+
+__all__ = ['BaseFeature','Feature','QuadTreeCell']
