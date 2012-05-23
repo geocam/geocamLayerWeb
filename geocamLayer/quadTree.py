@@ -6,6 +6,7 @@
 
 import sys
 import math
+import random
 
 from django.db import transaction
 
@@ -30,7 +31,7 @@ class QuadTree(object):
             cell = self.cells[index]
         else:
             zoom, x, y = index
-            cell = self.cells.setdefault(index, QuadTreeCell(zoom=zoom, x=x, y=y))
+            cell = self.cells.setdefault(index, QuadTreeCell(zoom=zoom, x=x, y=y, pkey=random.random()))
         return cell
 
     def getCellAtLonLat(self, zoom, lonLat):

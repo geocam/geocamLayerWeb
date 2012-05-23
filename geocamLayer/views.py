@@ -30,6 +30,7 @@ def quadTree(request, zoom, x, y):
     top_coords = (0,x,y)
     top_cell = QuadTreeCell.getCellAtIndex(top_coords)
     features = Feature.objects.all().filter(cell=top_cell)
+    print top_cell.features.all()
     print "Got %s features (should be %s)" % (len(features), top_cell.count)
     return HttpResponse('{}');
 

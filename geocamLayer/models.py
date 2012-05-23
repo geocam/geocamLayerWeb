@@ -84,6 +84,10 @@ class QuadTreeCell(models.Model):
     south = models.FloatField(null=True, blank=True)
     east = models.FloatField(null=True, blank=True)
     north = models.FloatField(null=True, blank=True)
+    # many-to-many for features
+    features = models.ManyToManyField("Feature")
+    # primary key because we need one
+    pkey = models.FloatField(primary_key=True)
 
     class Meta:
         ordering = ('zoom', 'x', 'y')
@@ -106,7 +110,7 @@ class QuadTreeCell(models.Model):
     @staticmethod
     def getCellAtIndex(coords):
         zoom, x, y = coords
-        cell, _created = QuadTreeCell.objects.get_or_create(zoom=zoom, x=x, y=y)
+        cell, _created = QuadTreeCell.objects.get_or_create(zoom=zoom, x=x, y=y, pkey=random.random())
         return cell
 
     @staticmethod
@@ -143,6 +147,7 @@ class QuadTreeCell(models.Model):
             self.north = feature.lat
 
         self.count += 1
+        self.features.add(feature)
 
     def getDiameter(self):
         if self.count:
