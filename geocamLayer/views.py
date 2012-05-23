@@ -26,6 +26,13 @@ DEFAULT_ENCODING = ["geojson"]
 def main(request):
     return HttpResponseRedirect('/static/geojsontest.html')
 
+def quadTree(request, zoom, x, y):
+    top_coords = (0,x,y)
+    top_cell = QuadTreeCell.getCellAtIndex(top_coords)
+    features = Feature.objects.all().filter(cell=top_cell)
+    print "Got %s features (should be %s)" % (len(features), top_cell.count)
+    return HttpResponse('{}');
+
 def points(request, zoom, x, y, objects, encoding=None):
     zoom, x, y = [float(z) for z in [zoom, x, y]]
     south = y - (90/(zoom))

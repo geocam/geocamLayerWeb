@@ -29,6 +29,7 @@ urlpatterns = patterns('',
 )
 urlpatterns += patterns('geocamLayer',
     (r'^points/(?P<zoom>[-.0-9]*)/(?P<x>[-.0-9]*)/(?P<y>[-.0-9]*)', 'views.points', {'objects':objects}),
+    (r'^quad/(?P<zoom>[-.0-9]*)/(?P<x>[-.0-9]*)/(?P<y>[-.0-9]*)', 'views.quadTree', {}),
     (r'^$', 'views.main', {})
     )
 
