@@ -5,6 +5,7 @@
 # __END_LICENSE__
 
 from geocamLayer.models import Feature
+import random
 
 
 def parseDegrees(data, positiveDirection):
@@ -41,4 +42,5 @@ def readNoaaWeatherStations(fname):
         yield Feature(lat=parseLatitude(stationLatitude),
                       lng=parseLongitude(stationLongitude),
                       name=placeName,
-                      description=countryName)
+                      description=countryName,
+                      pkey=random.random())

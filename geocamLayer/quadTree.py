@@ -42,13 +42,15 @@ class QuadTree(object):
 
     def addFeatureToCell(self, feature, cell):
         cell.updateStats(feature)
+        cell.save()
+        feature.save()
 
         if cell.isLeaf:
             feature.cell = cell
             self.features.append(feature)
-            if not hasattr(cell, 'features'):
-                cell.features = []
-            cell.features.append(feature)
+            #if not hasattr(cell, 'features'):
+            #    cell.features = []
+            cell.features.add(feature)
 
             if cell.count >= MAX_FEATURES_PER_CELL and cell.zoom < MAX_ZOOM - 1:
                 self.splitCell(cell)
@@ -62,7 +64,7 @@ class QuadTree(object):
 
     def splitCell(self, cell):
         cell.isLeaf = False
-        for feature in cell.features:
+        for feature in cell.features.all():
             self.addFeatureToZoom(feature, cell.zoom + 1)
 
     @transaction.commit_manually

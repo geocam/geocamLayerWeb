@@ -48,6 +48,8 @@ class Feature(BaseFeature):
     name = models.CharField(max_length=80)
     description = models.TextField()
     cell = models.ForeignKey('QuadTreeCell', null=True, blank=True)
+    # primary key because
+    pkey = models.FloatField(primary_key=True)
 
     def __unicode__(self):
         return u'Feature "%s" (%.6f, %.6f)' % (self.name, self.lng, self.lat)
@@ -61,6 +63,7 @@ class Feature(BaseFeature):
         feature.timespan = random.randint(0,3)
         feature.name = "Random Feature"
         feature.description = "Random Feature"
+        feature.pkey = random.random()
         return feature
         
     def getPosition(self): return (self.lng,self.lat)
@@ -147,6 +150,8 @@ class QuadTreeCell(models.Model):
             self.north = feature.lat
 
         self.count += 1
+        self.save()
+        feature.save()
         self.features.add(feature)
 
     def getDiameter(self):
