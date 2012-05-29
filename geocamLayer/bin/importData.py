@@ -42,7 +42,7 @@ def importData(opts):
 
     tree = QuadTree()
     if opts.noaa:
-        sys.stdout.write('noaa import')
+        sys.stdout.write('noaa import\n')
         importFeatures(tree, readNoaaWeatherStations(opts.noaa), opts.maxNumFeatures)
     tree.finish()
     print

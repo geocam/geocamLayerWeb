@@ -47,7 +47,7 @@ class Feature(BaseFeature):
     timespan = models.FloatField(null=True, blank=True)
     name = models.CharField(max_length=80)
     description = models.TextField()
-    cell = models.ForeignKey('QuadTreeCell', null=True, blank=True)
+    cell = models.ForeignKey('QuadTreeCell')
 
     def __unicode__(self):
         return u'Feature "%s" (%.6f, %.6f)' % (self.name, self.lng, self.lat)
@@ -84,6 +84,8 @@ class QuadTreeCell(models.Model):
     south = models.FloatField(null=True, blank=True)
     east = models.FloatField(null=True, blank=True)
     north = models.FloatField(null=True, blank=True)
+    # pkey because
+    pkey = models.FloatField(primary_key=True, unique=True)
 
     class Meta:
         ordering = ('zoom', 'x', 'y')
@@ -117,7 +119,7 @@ class QuadTreeCell(models.Model):
         try:
             cell = QuadTreeCell.objects.get(zoom=zoom, x=x, y=y)
         except QuadTreeCell.DoesNotExist:
-            cell = QuadTreeCell(zoom=zoom, x=x, y=y, isLeaf=True)
+            cell = QuadTreeCell(zoom=zoom, x=x, y=y, pkey=random.random(), isLeaf=True)
         return cell
 
     @staticmethod
@@ -162,7 +164,7 @@ class QuadTreeCell(models.Model):
         for cell in cells:
             # there's probably a faster way to do this
             features.extend(Feature.objects.filter(cell=cell))
-        return features
+        return list(set(features))
 
     def getSize(self):
         return QuadTreeCell.getSizeForZoom(self.zoom)
