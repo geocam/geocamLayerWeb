@@ -48,8 +48,6 @@ class Feature(BaseFeature):
     name = models.CharField(max_length=80)
     description = models.TextField()
     cell = models.ForeignKey('QuadTreeCell', null=True, blank=True)
-    # primary key because
-    pkey = models.FloatField(primary_key=True)
 
     def __unicode__(self):
         return u'Feature "%s" (%.6f, %.6f)' % (self.name, self.lng, self.lat)
@@ -63,7 +61,6 @@ class Feature(BaseFeature):
         feature.timespan = random.randint(0,3)
         feature.name = "Random Feature"
         feature.description = "Random Feature"
-        feature.pkey = random.random()
         return feature
         
     def getPosition(self): return (self.lng,self.lat)
@@ -87,10 +84,6 @@ class QuadTreeCell(models.Model):
     south = models.FloatField(null=True, blank=True)
     east = models.FloatField(null=True, blank=True)
     north = models.FloatField(null=True, blank=True)
-    # many-to-many for features
-    features = models.ManyToManyField("Feature")
-    # primary key because we need one
-    pkey = models.FloatField(primary_key=True)
 
     class Meta:
         ordering = ('zoom', 'x', 'y')
@@ -111,15 +104,65 @@ class QuadTreeCell(models.Model):
         return (zoom, x, y)
 
     @staticmethod
+    def getLonLatAtIndex(zoom, x, y):
+        size = QuadTreeCell.getSizeForZoom(zoom)
+        lng = float((x * size) + (-180))
+        lat = float((y * size) + (-90))
+        return (zoom, lng, lat)
+
+    @staticmethod
     def getCellAtIndex(coords):
-        zoom, x, y = coords
-        cell, _created = QuadTreeCell.objects.get_or_create(zoom=zoom, x=x, y=y, pkey=random.random())
+        assert(isinstance(coords, (list,tuple)))
+        zoom, x, y = [int(x) for x in coords]
+        cell, _created = QuadTreeCell.objects.get_or_create(zoom=zoom, x=x, y=y)
+        if _created:
+            print "didn't find cell %s/%s/%s" % (zoom, x, y)
+            cell.isLeaf = True
         return cell
 
     @staticmethod
     def getCellAtLonLat(zoom, lonLat):
         return (QuadTreeCell.getCellAtIndex
                 (QuadTreeCell.getIndexAtLonLat(zoom, lonLat)))
+
+    @staticmethod
+    def getCellsUnderIndex(zoom, x, y):
+        cell = QuadTreeCell.getCellAtIndex(zoom, (x, y))
+        if cell.isLeaf: return None
+        cells = []
+        zoom, lng, lat = QuadTreeCell.getLonLatAtIndex(zoom, (x, y))
+        size = QuadTreeCell.getSizeForZoom(zoom)
+        cells.append(QuadTreeCell.getCellAtLonLat(zoom+1, (lng,lat)))
+        cells.append(QuadTreeCell.getCellAtLonLat(zoom+1, (lng+size,lat)))
+        cells.append(QuadTreeCell.getCellAtLonLat(zoom+1, (lng,lat+size)))
+        cells.append(QuadTreeCell.getCellAtLonLat(zoom+1, (lng+size,lat+size)))
+        return cells
+
+    @staticmethod
+    def getLeavesUnderLonLat(zoom, lonLat):
+        cell = QuadTreeCell.getCellAtLonLat(zoom, lonLat)
+        if cell.isLeaf: return [cell]
+        lng, lat = lonLat
+        cells = []
+        size = QuadTreeCell.getSizeForZoom(zoom)
+        cells.extend(QuadTreeCell.getLeavesUnderLonLat(zoom+1, (lng,lat)))
+        cells.extend(QuadTreeCell.getLeavesUnderLonLat(zoom+1, (lng+size,lat)))
+        cells.extend(QuadTreeCell.getLeavesUnderLonLat(zoom+1, (lng,lat+size)))
+        cells.extend(QuadTreeCell.getLeavesUnderLonLat(zoom+1, (lng+size,lat+size)))
+        return cells
+
+    @staticmethod
+    def getLeavesUnderIndex(zoom, x, y):
+        zoom, lng, lat = QuadTreeCell.getLonLatAtIndex(zoom, x, y)
+        return QuadTreeCell.getLeavesUnderLonLat(zoom, (lng,lat))
+
+    @staticmethod
+    def getFeaturesFromCells(cells):
+        features = []
+        for cell in cells:
+            # there's probably a faster way to do this
+            features.extend(Feature.objects.filter(cell=cell))
+        return features
 
     def getSize(self):
         return QuadTreeCell.getSizeForZoom(self.zoom)
@@ -150,9 +193,6 @@ class QuadTreeCell(models.Model):
             self.north = feature.lat
 
         self.count += 1
-        self.save()
-        feature.save()
-        self.features.add(feature)
 
     def getDiameter(self):
         if self.count:

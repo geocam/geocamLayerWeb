@@ -27,10 +27,12 @@ def main(request):
     return HttpResponseRedirect('/static/geojsontest.html')
 
 def quadTree(request, zoom, x, y):
-    top_coords = (0,x,y)
+    zoom = float(zoom)
+    x = float(x)
+    y = float(y)
+    top_coords = (zoom,x,y)
     top_cell = QuadTreeCell.getCellAtIndex(top_coords)
-    features = Feature.objects.all().filter(cell=top_cell)
-    print top_cell.features.all()
+    features = QuadTreeCell.getFeaturesFromCells(QuadTreeCell.getLeavesUnderIndex(zoom, x, y))
     print "Got %s features (should be %s)" % (len(features), top_cell.count)
     return HttpResponse('{}');
 

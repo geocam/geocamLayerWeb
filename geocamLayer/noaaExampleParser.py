@@ -42,5 +42,4 @@ def readNoaaWeatherStations(fname):
         yield Feature(lat=parseLatitude(stationLatitude),
                       lng=parseLongitude(stationLongitude),
                       name=placeName,
-                      description=countryName,
-                      pkey=random.random())
+                      description=countryName)
