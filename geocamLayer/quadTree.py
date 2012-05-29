@@ -68,7 +68,8 @@ class QuadTree(object):
     @transaction.commit_manually
     def finish(self):
         for cell in self.cells.itervalues():
-            cell.save()
+            if cell.count: cell.save()
+            else: cell.delete()
             sys.stdout.write('c')
             sys.stdout.flush()
         transaction.commit()

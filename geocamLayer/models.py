@@ -114,10 +114,10 @@ class QuadTreeCell(models.Model):
     def getCellAtIndex(coords):
         assert(isinstance(coords, (list,tuple)))
         zoom, x, y = [int(x) for x in coords]
-        cell, _created = QuadTreeCell.objects.get_or_create(zoom=zoom, x=x, y=y)
-        if _created:
-            print "didn't find cell %s/%s/%s" % (zoom, x, y)
-            cell.isLeaf = True
+        try:
+            cell = QuadTreeCell.objects.get(zoom=zoom, x=x, y=y)
+        except QuadTreeCell.DoesNotExist:
+            cell = QuadTreeCell(zoom=zoom, x=x, y=y, isLeaf=True)
         return cell
 
     @staticmethod
