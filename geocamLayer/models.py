@@ -48,6 +48,8 @@ class Feature(BaseFeature):
     name = models.CharField(max_length=80)
     description = models.TextField()
     cell = models.ForeignKey('QuadTreeCell')
+    # primary key because
+    pkey = models.FloatField(primary_key=True, unique=True)
 
     def __unicode__(self):
         return u'Feature "%s" (%.6f, %.6f)' % (self.name, self.lng, self.lat)
@@ -180,6 +182,8 @@ class QuadTreeCell(models.Model):
         return (west, south, west + size, south + size)
 
     def updateStats(self, feature):
+        if hasattr(self, 'features') and feature in self.features:
+            return # we don't want to have duplicate features in a cell
         self.lng = (self.count * self.lng + feature.lng) / (self.count + 1)
         self.lat = (self.count * self.lat + feature.lat) / (self.count + 1)
 
