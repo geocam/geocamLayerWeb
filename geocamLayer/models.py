@@ -132,14 +132,12 @@ class QuadTreeCell(models.Model):
     @staticmethod
     def getCellsUnderIndex(zoom, x, y):
         cell = QuadTreeCell.getCellAtIndex(zoom, (x, y))
-        if cell.isLeaf: return None
+        if cell.isLeaf: return []
         cells = []
-        zoom, lng, lat = QuadTreeCell.getLonLatAtIndex(zoom, (x, y))
-        size = QuadTreeCell.getSizeForZoom(zoom)
-        cells.append(QuadTreeCell.getCellAtLonLat(zoom+1, (lng,lat)))
-        cells.append(QuadTreeCell.getCellAtLonLat(zoom+1, (lng+size,lat)))
-        cells.append(QuadTreeCell.getCellAtLonLat(zoom+1, (lng,lat+size)))
-        cells.append(QuadTreeCell.getCellAtLonLat(zoom+1, (lng+size,lat+size)))
+        cells.append(QuadTreeCell.getCellAtIndex(zoom+1, (2 * x, 2 * y)))
+        cells.append(QuadTreeCell.getCellAtIndex(zoom+1, ((2 * x) + 1, 2 * y)))
+        cells.append(QuadTreeCell.getCellAtIndex(zoom+1, (2 * x, (2 * y) + 1)))
+        cells.append(QuadTreeCell.getCellAtIndex(zoom+1, ((2 * x) + 1,(2 * y) + 1)))
         return cells
 
     @staticmethod
